@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تحذير أمني هام!</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts (Cairo) -->
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
+    <!-- Confetti Library -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    
+    <style>
+        body {
+            font-family: 'Cairo', sans-serif;
+            overflow-x: hidden;
+        }
+        .hidden-section {
+            display: none;
+        }
+        .shake {
+            animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both;
+        }
+        @keyframes shake {
+            10%, 90% { transform: translate3d(-1px, 0, 0); }
+            20%, 80% { transform: translate3d(2px, 0, 0); }
+            30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
+            40%, 60% { transform: translate3d(4px, 0, 0); }
+        }
+        .glitch-text {
+            position: relative;
+        }
+        .glitch-text::before, .glitch-text::after {
+            content: attr(data-text);
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+        .btn-hover-run {
+            transition: all 0.2s ease;
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-white min-h-screen flex items-center justify-center p-4">
+
+    <!-- Screen 1: The Warning (Fake Error) -->
+    <div id="screen-1" class="max-w-md w-full bg-red-900/20 border-2 border-red-500 rounded-lg p-6 text-center shadow-[0_0_20px_rgba(239,68,68,0.5)]">
+        <div class="mb-4 flex justify-center">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 text-red-500 animate-pulse" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+            </svg>
+        </div>
+        <h1 class="text-3xl font-bold text-red-500 mb-2">تنبيه أمني!</h1>
+        <p class="text-lg mb-6">تم اكتشاف نشاط غير معتاد في الجدول الزمني.</p>
+        <div class="bg-black/50 p-4 rounded mb-6 text-left" dir="ltr">
+            <code class="text-green-400 text-sm">
+                > Scanning DNA...<br>
+                > Status: AGING DETECTED<br>
+                > Wrinkles: LOADING 20%...<br>
+                > Cuteness Level: CRITICAL OVERLOAD
+            </code>
+        </div>
+        <button onclick="nextScreen(2)" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-4 rounded transition transform hover:scale-105">
+            بدء التحقق من الهوية
+        </button>
+    </div>
+
+    <!-- Screen 2: The Quiz (Funny Questions) -->
+    <div id="screen-2" class="hidden-section max-w-md w-full bg-gray-800 border border-gray-700 rounded-lg p-6 text-center shadow-xl">
+        <h2 class="text-2xl font-bold mb-6 text-yellow-400">إجراءات روتينية</h2>
+        
+        <div id="question-box">
+            <p class="text-xl mb-8">سؤال أمني 1: هل تشعرين بطقطقة في الركبة عند صعود الدرج؟</p>
+            <div class="flex gap-4 justify-center">
+                <button onclick="wrongAnswer(this)" class="bg-gray-600 hover:bg-gray-500 text-white font-bold py-2 px-6 rounded">
+                    لا، أنا شباب
+                </button>
+                <button onclick="nextScreen(3)" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded">
+                    نعم، أحياناً 👵
+                </button>
+            </div>
+            <p id="error-msg" class="text-red-400 mt-4 hidden text-sm">خطأ: النظام يعرف الحقيقة.. لا تكذبي!</p>
+        </div>
+    </div>
+
+    <!-- Screen 3: Loading Bar (The Roast) -->
+    <div id="screen-3" class="hidden-section max-w-md w-full text-center">
+        <h2 class="text-2xl font-bold mb-4">جاري تحليل البيانات...</h2>
+        <div class="w-full bg-gray-700 rounded-full h-6 mb-2">
+            <div id="progress-bar" class="bg-gradient-to-r from-pink-500 to-purple-500 h-6 rounded-full transition-all duration-[3000ms] w-0"></div>
+        </div>
+        <p id="loading-text" class="text-gray-400 animate-pulse">جاري حساب عدد الشعرات البيضاء...</p>
+    </div>
+
+    <!-- Screen 4: The Prank (Runaway Button) -->
+    <div id="screen-4" class="hidden-section max-w-md w-full bg-gray-800 rounded-lg p-8 text-center relative overflow-hidden">
+        <h2 class="text-3xl font-bold text-pink-400 mb-4">تم تأكيد الهوية!</h2>
+        <p class="text-lg mb-8">بما أنك كبرتِ سنة، النظام قرر يمنحك هدية قيمة جداً.</p>
+        
+        <div class="h-40 flex items-center justify-center relative">
+            <button id="gift-btn" onmouseover="moveButton()" onclick="alert('كيف مسكتيه؟! طيب اضغطي موافق 😂')" class="absolute bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-6 rounded shadow-lg transition-all duration-100 z-10">
+                استلام آيفون 16 برو ماكس
+            </button>
+        </div>
+
+        <button onclick="nextScreen(5)" class="mt-8 text-gray-500 underline text-sm hover:text-gray-300">
+            تخطي واستلام الهدية الحقيقية (المعنوية)
+        </button>
+    </div>
+
+    <!-- Screen 5: The Finale (Celebration) -->
+    <div id="screen-5" class="hidden-section max-w-2xl w-full text-center z-50">
+        <div class="animate-bounce mb-6">
+            <span class="text-6xl">🎂</span>
+        </div>
+        <h1 class="text-5xl md:text-7xl font-black text-transparent bg-clip-text bg-gradient-to-r from-pink-400 via-purple-400 to-indigo-400 mb-6 leading-tight">
+            عيد ميلاد سعيد!
+        </h1>
+        <div class="bg-white/10 backdrop-blur-md rounded-xl p-8 shadow-2xl border border-white/20">
+            <p class="text-xl md:text-2xl leading-relaxed mb-6 font-light">
+                كل عام وأنتِ الأجمل، والألطف، والأخف دماً! <br>
+                صحيح كبرنا سنة، بس لسا العقل صغير والقلب طفل.
+                <br><br>
+                <span class="font-bold text-yellow-300">سنة حلوة تشبه قلبك! ❤️</span>
+            </p>
+            <div class="flex justify-center gap-4 mt-8">
+                <button onclick="fireConfetti()" class="bg-pink-600 hover:bg-pink-700 text-white font-bold py-3 px-8 rounded-full shadow-lg transform transition hover:scale-110">
+                    🎉 احتفال مرة أخرى
+                </button>
+            </div>
+        </div>
+        <p class="mt-8 text-gray-500 text-sm">ملاحظة: الآيفون كان كذبة.. بس المحبة حقيقية 🏃‍♂️</p>
+    </div>
+
+    <script>
+        // Sound effects (Optional - Browsers block autoplay often, so we keep it silent or user triggered)
+        
+        function nextScreen(screenNum) {
+            // Hide all screens
+            document.querySelectorAll('[id^="screen-"]').forEach(el => {
+                el.classList.add('hidden-section');
+            });
+
+            // Show target screen
+            const target = document.getElementById(`screen-${screenNum}`);
+            target.classList.remove('hidden-section');
+
+            // Specific logic per screen
+            if (screenNum === 3) {
+                startLoading();
+            }
+            if (screenNum === 5) {
+                fireConfetti();
+                setInterval(fireConfetti, 3000);
+            }
+        }
+
+        function wrongAnswer(btn) {
+            const errorMsg = document.getElementById('error-msg');
+            errorMsg.classList.remove('hidden');
+            btn.parentElement.parentElement.classList.add('shake');
+            setTimeout(() => {
+                btn.parentElement.parentElement.classList.remove('shake');
+            }, 500);
+        }
+
+        function startLoading() {
+            const bar = document.getElementById('progress-bar');
+            const text = document.getElementById('loading-text');
+            
+            // Trigger animation
+            setTimeout(() => { bar.style.width = '100%'; }, 100);
+
+            const texts = [
+                "جاري تحميل التجاعيد...",
+                "جاري الاتصال بدار المسنين...",
+                "تم اكتشاف كميات عالية من اللطافة...",
+                "تجهيز الكيكة...",
+                "تقريباً خلصنا..."
+            ];
+
+            let i = 0;
+            const interval = setInterval(() => {
+                if (i < texts.length) {
+                    text.innerText = texts[i];
+                    i++;
+                } else {
+                    clearInterval(interval);
+                    setTimeout(() => nextScreen(4), 1000);
+                }
+            }, 800);
+        }
+
+        function moveButton() {
+            const btn = document.getElementById('gift-btn');
+            const container = btn.parentElement;
+            
+            const containerRect = container.getBoundingClientRect();
+            const btnRect = btn.getBoundingClientRect();
+
+            // Calculate safe area (so button doesn't go outside container)
+            const maxX = containerRect.width - btnRect.width;
+            const maxY = containerRect.height - btnRect.height;
+
+            const randomX = Math.floor(Math.random() * maxX);
+            const randomY = Math.floor(Math.random() * maxY);
+
+            // Apply translation directly is smoother
+            btn.style.transform = `translate(${randomX - (maxX/2)}px, ${randomY - (maxY/2)}px)`;
+            
+            // Randomly change color to induce panic
+            const colors = ['bg-red-500', 'bg-blue-500', 'bg-purple-500', 'bg-green-500'];
+            const randomColor = colors[Math.floor(Math.random() * colors.length)];
+            
+            // Remove old color classes and add new one
+            btn.className = btn.className.replace(/bg-\w+-500/g, randomColor);
+        }
+
+        function fireConfetti() {
+            var count = 200;
+            var defaults = {
+                origin: { y: 0.7 }
+            };
+
+            function fire(particleRatio, opts) {
+                confetti(Object.assign({}, defaults, opts, {
+                    particleCount: Math.floor(count * particleRatio)
+                }));
+            }
+
+            fire(0.25, {
+                spread: 26,
+                startVelocity: 55,
+            });
+            fire(0.2, {
+                spread: 60,
+                
+            });
+            fire(0.35, {
+                spread: 100,
+                decay: 0.91,
+                scalar: 0.8
+            });
+            fire(0.1, {
+                spread: 120,
+                startVelocity: 25,
+                decay: 0.92,
+                scalar: 1.2
+            });
+            fire(0.1, {
+                spread: 120,
+                startVelocity: 45,
+            });
+        }
+    </script>
+</body>
+</html>
